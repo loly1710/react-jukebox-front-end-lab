@@ -53,12 +53,12 @@ const TrackForm = (props) => {
           onChange={handleChange}
         />
 
-        <label htmlFor="text-input">Artist</label>
-        <textarea
+        <label htmlFor="artist-input">Artist</label>
+        <input
           type="text"
           required
-          name="text"
-          id="text-input"
+          name="artist"
+          id="artist-input"
           value={formData.artist}
           onChange={handleChange}
         />
