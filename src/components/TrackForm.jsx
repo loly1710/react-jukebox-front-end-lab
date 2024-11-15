@@ -1,70 +1,53 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import * as trackSevice from "../services/trackService";
+import React, { useEffect, useState } from "react";
 
-const TrackForm = (props) => {
-  const [formData, setFormData] = useState({
-    title: "",
-    artist: "",
-  });
-
-  const { trackId } = useParams();
+const TrackForm = ({ track, onSubmit, onCancel }) => {
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
 
   useEffect(() => {
-    const fetchTrack = async () => {
-      const trackData = await trackSevice.show(trackId);
-      setFormData(trackData);
-    };
-
-    if (trackId) {
-      fetchTrack();
+    if (track) {
+      setTitle(track.title || "");
+      setArtist(track.artist || "");
     } else {
-      setFormData({
-        title: "",
-        artist: "",
-      });
+      setTitle("");
+      setArtist("");
     }
-  }, [trackId]);
+  }, [track]);
 
-  const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
-  };
-
-  const handleSubmit = (event) => {
+  const submit = (event) => {
     event.preventDefault();
-    if (trackId) {
-      props.handleUpdateTRack(trackId, formData);
-    } else {
-      props.handleAddTrack(formData);
+    if (title && artist) {
+      onSubmit({ ...track, title, artist });
     }
   };
 
   return (
-    <main>
-      <form onSubmit={handleSubmit}>
-        <h1>{trackId ? "Edit Track" : "New Track"}</h1>
-        <label htmlFor="title-input">Title</label>
-        <input
-          type="text"
-          required
-          name="title"
-          id="title-input"
-          value={formData.title}
-          onChange={handleChange}
-        />
-
-        <label htmlFor="artist-input">Artist</label>
-        <input
-          type="text"
-          required
-          name="artist"
-          id="artist-input"
-          value={formData.artist}
-          onChange={handleChange}
-        />
-        <button type="submit">SUBMIT</button>
+    <div className="form-container">
+      <h2>{track ? "Update Track" : "Add Track"}</h2>
+      <form onSubmit={submit}>
+        <div>
+          <label>Title </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+        </div>
+        <div>
+          <label>Artist </label>
+          <input
+            type="text"
+            value={artist}
+            onChange={(event) => setArtist(event.target.value)}
+          />
+        </div>
+        <button type="submit">{track ? "Update" : "Add"}</button>
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
       </form>
-    </main>
+    </div>
   );
 };
+
 export default TrackForm;

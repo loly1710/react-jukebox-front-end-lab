@@ -1,54 +1,75 @@
-import React from "react";
-import * as trackService from "./services/trackService";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TrackList from "./components/TrackList";
 import TrackForm from "./components/TrackForm";
-//import NowPlaying from './components/NowPlaying'
-//import Home from './components/Home';
+import NowPlaying from "./components/NowPlaying";
+import { create, index, updateTrack, deleteTrack } from "./services/trackService";
+import './App.css';
 
 const App = () => {
-  const [user] = useState(trackService);
   const [tracks, setTracks] = useState([]);
-  //const [nowPlaying, setNowPlaying] = useState(null);
+
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [nowPlaying, setNowPlaying] = useState(null);
 
   useEffect(() => {
-    const fetchAllTracks = async () => {
-      const tracksData = await trackService.index();
-      setTracks(tracksData);
-    };
-    if (user) fetchAllTracks();
-  }, [user]);
+    getTracks();
+  }, []);
 
-  const handleAddTrack = async (trackFormData) => {
-    const newTrack = await trackService.create(trackFormData);
-    setTracks([newTrack, ...tracks]);
+  const getTracks = async () => {
+    const tracks = await index();
+    setTracks(tracks);
   };
 
-  const handleDeleteTrack = async (trackId) => {
-    const deleteTrack = await trackService.deleteTrack(trackId);
-    setTracks(tracks.filter((track) => track._id !== deleteTrack._id));
+  const addTrack = async (track) => {
+    const newTrack = await create(track);
+    setTracks([...tracks, newTrack]);
+    setIsAdding(false);
   };
 
-  const handleUpdateTrack = async (trackId, trackFormData) => {
-    const updateTrack = await trackService.updateTrack(trackFormData, trackId);
-    setTracks(
-      tracks.map((track) => (trackId === track._id ? updateTrack : track))
-    );
+  const handleUpdateTrack = async (track) => {
+    const updatedTrack = await updateTrack(track, track._id);
+    setTracks(tracks.map((t) => (t._id === updatedTrack._id ? updatedTrack : t)));
+    setIsUpdating(false);
+    setSelectedTrack(null);
   };
 
-  /*const handlePlay = (track) => {
+  const handleDeleteTrack = async (track) => {
+    await deleteTrack(track._id);
+    setTracks(tracks.filter((t) => t._id !== track._id));
+  };
+
+  const handlePlayTrack = (track) => {
     setNowPlaying(track);
-  };*/
+  };
 
   return (
-    <>
-      <TrackForm handleAddTrack={handleAddTrack} />
+    <div className="app-container">
+      <button className="action-button" onClick={() => setIsAdding(true)}>Add Track</button>
       <TrackList
-        trackList={tracks}
-        handleUpdateTrack={handleUpdateTrack}
-        handleDeleteTrack={handleDeleteTrack}
+        tracks={tracks}
+        onPlay={handlePlayTrack}
+        onUpdate={(track) => {
+          setSelectedTrack(track);
+          setIsUpdating(true);
+        }}
+        onDelete={handleDeleteTrack}
       />
-    </>
+      {(isUpdating || isAdding) && (
+        <TrackForm
+          track={isUpdating ? selectedTrack : null}
+          onSubmit={isUpdating ? handleUpdateTrack : addTrack}
+          onCancel={() => {
+            setIsUpdating(false);
+            setIsAdding(false);
+            setSelectedTrack(null);
+          }}
+        />
+      )}
+     {nowPlaying && <NowPlaying track={nowPlaying} onStop={() => setNowPlaying(null)} />}
+
+    </div>
   );
 };
 

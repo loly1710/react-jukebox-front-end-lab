@@ -1,50 +1,28 @@
+import React from "react";
+
 const TrackList = (props) => {
+    if(props.tracks.length === 0){
+        return (
+            <h2>No Tracks available</h2>
+        )
+    }
   return (
-    <div>
-      <button onClick={() => props.handleAddTrack("/TrackForm")}>
-        Add New Track
-      </button>
-      <h2>Track List</h2>
-      {props.trackList.map((track) => (
-        <div key={track._id}>
-          <span>
-            {track.title} by {track.artist}
-          </span>
-          <button onClick={() => props.handlePlay(track)}>Play</button>
-          <button onClick={() => props.handleUpdateTrack(track._id)}>
-            Edit
-          </button>
-          <button onClick={() => props.handleDeleteTrack(track._id)}>
-            Delete
-          </button>
-        </div>
-      ))}
+    <div className="track-list">
+      <h2 className="highlight-text">Track List</h2>
+      <div className="grid-container">
+        {props.tracks.map((track) => (
+          <div key={track._id} className="track-item">
+            <p>{track.title} by <span className="highlight-text">{track.artist}</span></p>
+            <div>
+              <button onClick={() => props.onPlay(track)}>Play</button>
+              <button onClick={() => props.onUpdate(track)}>Update</button>
+              <button onClick={() => props.onDelete(track)}>Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
-
-/*const TrackList = (props) => {
-    
-    const tracks = props.trackList.map((track) => 
-    <a key={track._id} onClick={() => props.updateSelected(track)}><li>{track.name}</li>
-    </a>);
-
-    return (
-        <div>
-            <button onClick={() => props.handleAddTrack('/TrackForm')}>Add New Track</button>
-      <h2>Track List</h2>
-      {tracks.map((track) => (
-        <div key={track.id}>
-          <span>{track.title} by {track.artist}</span>
-          <button onClick={() => props.handlePlay(track)}>Play</button>
-          <button onClick={() => props.handleUpdateTrack(track.id)}>Edit</button>
-          <button onClick={() => props.handleDeleteTrack(track._id)}>Delete</button>
-
-        </div>
-      ))}
-      
-    </div>
-    )
-}*/
 
 export default TrackList;
